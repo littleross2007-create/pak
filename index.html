@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROJECT ALL KILL | BATTLE ROYALE CONSOLE</title>
+    <style>
+        :root {
+            --red: #ff0000;
+            --dark-red: #440000;
+            --bg: #000000;
+            --text: #ffffff;
+            --border: #333333;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background: var(--bg);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            color: var(--text);
+        }
+
+        /* --- LOADING SCREEN --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        #matrix-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            color: rgba(255, 0, 0, 0.15);
+            font-size: 10px;
+            overflow: hidden;
+            z-index: -1;
+            word-break: break-all;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .boot-box { text-align: center; width: 80%; max-width: 600px; }
+        .main-logo {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 900; color: var(--red);
+            letter-spacing: 15px;
+            text-shadow: 0 0 30px var(--red);
+            margin-bottom: 10px;
+            animation: glitch 0.2s infinite;
+        }
+
+        .loading-bar-container {
+            width: 100%; height: 4px;
+            background: #111; border: 1px solid var(--dark-red);
+            margin: 20px 0;
+        }
+
+        .loading-bar-fill {
+            width: 0%; height: 100%;
+            background: var(--red);
+            box-shadow: 0 0 15px var(--red);
+        }
+
+        #log-console {
+            color: #555; font-size: 0.8rem; text-align: left;
+            height: 80px; overflow: hidden;
+            border-left: 2px solid var(--dark-red); padding-left: 10px;
+        }
+
+        /* --- MAIN UI --- */
+        #main-ui {
+            padding: 20px;
+            visibility: hidden; opacity: 0;
+            transition: opacity 2s;
+            max-width: 1400px; margin: 0 auto;
+        }
+
+        .nav-header { 
+            border-bottom: 2px solid var(--red); padding-bottom: 20px; margin-bottom: 30px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+        }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn { 
+            background: transparent; border: 1px solid var(--red); color: var(--red); 
+            padding: 10px 25px; cursor: pointer; text-transform: uppercase; 
+            font-weight: bold; transition: 0.3s;
+        }
+        .btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
+
+        /* ZONE & PARTICIPANT GRID */
+        .content-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; 
+        }
+
+        .item-card { 
+            background: #0a0a0a; border: 1px solid #222; 
+            position: relative; overflow: hidden; transition: 0.3s; cursor: crosshair;
+        }
+        .item-card:hover { border-color: var(--red); transform: translateY(-5px); }
+        .item-card img { 
+            width: 100%; height: 250px; object-fit: cover; 
+            filter: grayscale(0.5) brightness(0.7); transition: 0.4s; 
+        }
+        .item-card:hover img { filter: grayscale(0) brightness(1); }
+
+        .item-info { padding: 20px; border-top: 1px solid var(--dark-red); background: #0f0f0f; }
+        .item-title { color: var(--red); font-weight: bold; font-size: 1.4rem; letter-spacing: 1px; text-transform: uppercase; }
+        .item-desc { font-size: 0.85rem; color: #aaa; margin-top: 10px; line-height: 1.6; }
+        
+        .char-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; 
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            50% { transform: translate(-3px, 2px) skewX(2deg); opacity: 0.8; }
+            100% { transform: translate(3px, -2px); opacity: 1; }
+        }
+
+        .content-section { display: none; animation: fadeIn 1s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        #bgm-status {
+            position: fixed; bottom: 20px; right: 20px;
+            font-size: 0.7rem; color: var(--red);
+            text-transform: uppercase; letter-spacing: 2px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<audio id="bgm" loop>
+    <source src="battle.mp3" type="audio/mpeg">
+</audio>
+
+<div id="loading-overlay">
+    <div id="matrix-bg"></div>
+    <div class="boot-box">
+        <div class="main-logo">PROJECT ALL KILL</div>
+        <div id="boot-status" style="color: #888; letter-spacing: 3px; font-size: 0.8rem;">SYNCING BATTLE FEED...</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar-fill" id="bar"></div>
+        </div>
+        <div id="log-console"></div>
+    </div>
+</div>
+
+<div id="main-ui">
+    <div id="bgm-status">BGM: STREAMING_ACTIVE</div>
+    <header class="nav-header">
+        <div>
+            <h1 style="margin: 0; color: var(--red); letter-spacing: 10px; font-size: 2rem;">PROJECT ALL KILL</h1>
+            <span style="color: #444; font-size: 0.8rem;">GAME MASTER CONSOLE // TRACKING ALL PARTICIPANTS</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn active" onclick="show('areas', this)">ZONE INFO</button>
+            <button class="btn" onclick="show('chars', this)">PARTICIPANTS</button>
+        </div>
+    </header>
+
+    <div id="areas" class="content-section" style="display:block;">
+        <div class="content-grid">
+            <div class="item-card" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
+                <img src="https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/ruins.png" alt="Concrete Ruins">
+                <div class="item-info">
+                    <div class="item-title">Concrete Ruins</div>
+                    <div class="item-desc">
+                        삭막한 시멘트 구조물 위주의 지형. 발소리가 크게 울리며 엄폐물이 파손되기 쉽습니다.
+                    </div>
+                </div>
+            </div>
+            <div class="item-card" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
+                <img src="https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/forest.png" alt="Forest">
+                <div class="item-info">
+                    <div class="item-title">Forest (Commercial)</div>
+                    <div class="item-desc">
+시야가 좁고 수풀이 우거진 습지 지형. 정체불명의 소음이 가득하며, 함정과 기습에 가장 취약한 장소입니다.
+                       
+                    </div>
+                </div>
+            </div>
+            <div class="item-card" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
+                <img src="https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/tower.png" alt="Building">
+                <div class="item-info">
+                    <div class="item-title">Building (Wetlands)</div>
+                    <div class="item-desc">
+                       수직적인 구조의 중심 상업지구. 층간 소음과 유리 파편이 생존을 위협하며, 옥상은 저격수들의 주 격전지입니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="chars" class="content-section">
+        <div class="char-grid" id="charList"></div>
+    </div>
+</div>
+
+<script>
+    const data = [
+        { code: "Ghost", name: "Cha Yun-seol", weapon: "Combat Knife", origin: "South Korea", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/14.png" },
+        { code: "Spade", name: "Pierre Lavigne", weapon: "Booby Traps", origin: "France", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/15.png" },
+        { code: "Queen", name: "Clara Holloway", weapon: "Dual Pistols", origin: "USA", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/16.png" },
+        { code: "Coin", name: "Jol", weapon: "Fountain Pen", origin: "Unknown", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/9.png" },
+        { code: "Whisper", name: "Anna Sokolov", weapon: "Sniper Rifle", origin: "Unknown", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/12.png" },
+        { code: "Brute", name: "Diego Oropesa", weapon: "Brass Knuckles", origin: "Brazil", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/13.png" },
+        { code: "Swift", name: "Irina Volkova", weapon: "Dual Daggers", origin: "Russia", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/11.png" },
+        { code: "Swinger", name: "Lenny Black", weapon: "Metal Baseball Bat", origin: "USA", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/10.png" },
+        { code: "Sakura", name: "Rina Hanazawa", weapon: "Katana", origin: "Japan", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/8.png" },
+        { code: "Silent", name: "Chen Feng", weapon: "Handgun", origin: "China", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/7.png" },
+        { code: "Chain", name: "Lona McTavish", weapon: "Chainsaw", origin: "Scotland", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/6.png" },
+        { code: "Slasher", name: "Bato", weapon: "Machete", origin: "Philippines", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/2.png" },
+        { code: "Hummingbird", name: "Trixie Hamilton", weapon: "Assault Rifle", origin: "UK", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/1.png" },
+        { code: "Hunter", name: "Nyx", weapon: "Longbow", origin: "Norway", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/4.png" },
+        { code: "Crow", name: "Lee Si-woo", weapon: "Crossbow", origin: "South Korea", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/5.png" },
+        { code: "Teuton", name: "Ulrich von Magdeburg", weapon: "Longsword", origin: "Germany", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/3.png" }
+    ];
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playTacticalSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const now = audioCtx.currentTime;
+        const master = audioCtx.createGain();
+        master.connect(audioCtx.destination);
+
+        if (type === 'click') {
+            const osc1 = audioCtx.createOscillator();
+            const g1 = audioCtx.createGain();
+            osc1.type = 'sine'; osc1.frequency.setValueAtTime(120, now);
+            osc1.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+            g1.gain.setValueAtTime(0.4, now); g1.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc1.connect(g1); g1.connect(master);
+            osc1.start(); osc1.stop(now + 0.12);
+        } else if (type === 'hover') {
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            osc.type = 'square'; osc.frequency.setValueAtTime(1500, now);
+            g.gain.setValueAtTime(0.01, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+            osc.connect(g); g.connect(master);
+            osc.start(); osc.stop(now + 0.03);
+        }
+    }
+
+    window.onload = () => {
+        const bg = document.getElementById('matrix-bg');
+        bg.innerText = Array.from({length: 4000}, () => Math.floor(Math.random()*2)).join('');
+
+        let progress = 0;
+        const bar = document.getElementById('bar');
+        const status = document.getElementById('boot-status');
+        const consoleLog = document.getElementById('log-console');
+
+        const logs = [
+            "SCANNING TOPOGRAPHY...", "IDENTIFYING SECTORS...", "P.DATA_LOAD_01... OK", 
+            "CONNECTING LIVE FEED...", "AMPLIFYING AUDIO SENSORS...", "LINK ESTABLISHED"
+        ];
+
+        const timer = setInterval(() => {
+            progress += Math.random() * 2.5;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(timer);
+                finishBoot();
+            }
+            bar.style.width = progress + "%";
+            
+            if (Math.random() > 0.85) {
+                const msg = logs[Math.floor((progress/100) * (logs.length-1))];
+                status.innerText = msg;
+                const line = document.createElement('div');
+                line.innerText = "> " + msg;
+                consoleLog.prepend(line);
+                playTacticalSound('hover');
+            }
+        }, 100);
+    };
+
+    function finishBoot() {
+        const overlay = document.getElementById('loading-overlay');
+        const main = document.getElementById('main-ui');
+        const bgm = document.getElementById('bgm');
+
+        overlay.style.opacity = '0';
+        bgm.play().catch(e => console.log("BGM pending user interaction."));
+
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            main.style.visibility = 'visible';
+            main.style.opacity = '1';
+            document.body.style.overflow = 'auto';
+        }, 1500);
+    }
+
+    function render() {
+        const grid = document.getElementById('charList');
+        grid.innerHTML = data.map(c => `
+            <div class="item-card" style="cursor: crosshair;" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
+                <img src="${c.img}" alt="${c.code}" style="height: 400px;" onerror="this.src='https://via.placeholder.com/300x400/000/ff0000?text=SIGNAL+LOST'">
+                <div class="item-info">
+                    <div class="item-title">${c.code}</div>
+                    <div class="item-desc" style="font-size: 0.75rem; text-transform: uppercase;">
+                        <b style="color:#bbb">NAME:</b> ${c.name}<br>
+                        <b style="color:#bbb">WEAPON:</b> ${c.weapon}<br>
+                        <b style="color:#bbb">ORIGIN:</b> ${c.origin}
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function show(id, btn) {
+        playTacticalSound('click');
+        document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none');
+        document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display = 'block';
+        btn.classList.add('active');
+    }
+
+    render();
+</script>
+</body>
+</html>
