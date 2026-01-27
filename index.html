@@ -77,7 +77,7 @@
 
         /* --- MAIN UI --- */
         #main-ui {
-            padding: 20px;
+            padding: 20px 20px 100px 20px; /* Player space at bottom */
             visibility: hidden; opacity: 0;
             transition: opacity 2s;
             max-width: 1400px; margin: 0 auto;
@@ -96,7 +96,6 @@
         }
         .btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
 
-        /* ZONE & PARTICIPANT GRID */
         .content-grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; 
         }
@@ -129,17 +128,55 @@
         .content-section { display: none; animation: fadeIn 1s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #bgm-status {
-            position: fixed; bottom: 20px; right: 20px;
-            font-size: 0.7rem; color: var(--red);
-            text-transform: uppercase; letter-spacing: 2px;
-            z-index: 100;
+        /* --- NEW AUDIO PLAYER UI --- */
+        #audio-player-container {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 1px solid var(--dark-red);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 30px;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+
+        .player-controls { display: flex; align-items: center; gap: 20px; width: 100%; max-width: 1200px; }
+        
+        #play-pause-btn {
+            background: transparent; border: 1px solid var(--red);
+            color: var(--red); width: 40px; height: 40px; cursor: pointer;
+            font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+        }
+        #play-pause-btn:hover { background: var(--red); color: white; }
+
+        .progress-container { flex-grow: 1; display: flex; align-items: center; gap: 15px; }
+        .time-display { font-size: 0.7rem; color: var(--red); min-width: 45px; }
+        
+        #seek-bar {
+            flex-grow: 1; accent-color: var(--red); cursor: pointer;
+            height: 2px; background: #333;
+        }
+
+        .volume-container { display: flex; align-items: center; gap: 10px; min-width: 150px; }
+        #volume-bar { width: 80px; accent-color: var(--red); cursor: pointer; }
+
+        #bgm-status-text {
+            color: var(--red); font-size: 0.7rem; letter-spacing: 2px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-<audio id="bgm" loop controls>
+<audio id="bgm" loop>
     <source src="./battle.mp3" type="audio/mpeg">
 </audio>
 
@@ -156,7 +193,6 @@
 </div>
 
 <div id="main-ui">
-    <div id="bgm-status">BGM: STREAMING_ACTIVE</div>
     <header class="nav-header">
         <div>
             <h1 style="margin: 0; color: var(--red); letter-spacing: 10px; font-size: 2rem;">PROJECT ALL KILL</h1>
@@ -174,28 +210,21 @@
                 <img src="https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/ruins.png" alt="Concrete Ruins">
                 <div class="item-info">
                     <div class="item-title">Concrete Ruins</div>
-                    <div class="item-desc">
-                        삭막한 시멘트 구조물 위주의 지형. 발소리가 크게 울리며 엄폐물이 파손되기 쉽습니다.
-                    </div>
+                    <div class="item-desc">삭막한 시멘트 구조물 위주의 지형. 발소리가 크게 울리며 엄폐물이 파손되기 쉽습니다.</div>
                 </div>
             </div>
             <div class="item-card" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
                 <img src="https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/forest.png" alt="Forest">
                 <div class="item-info">
                     <div class="item-title">Forest (Commercial)</div>
-                    <div class="item-desc">
-시야가 좁고 수풀이 우거진 습지 지형. 정체불명의 소음이 가득하며, 함정과 기습에 가장 취약한 장소입니다.
-                       
-                    </div>
+                    <div class="item-desc">시야가 좁고 수풀이 우거진 습지 지형. 정체불명의 소음이 가득하며, 함정과 기습에 가장 취약한 장소입니다.</div>
                 </div>
             </div>
             <div class="item-card" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
                 <img src="https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/tower.png" alt="Building">
                 <div class="item-info">
                     <div class="item-title">Building (Wetlands)</div>
-                    <div class="item-desc">
-                       수직적인 구조의 중심 상업지구. 층간 소음과 유리 파편이 생존을 위협하며, 옥상은 저격수들의 주 격전지입니다.
-                    </div>
+                    <div class="item-desc">수직적인 구조의 중심 상업지구. 층간 소음과 유리 파편이 생존을 위협하며, 옥상은 저격수들의 주 격전지입니다.</div>
                 </div>
             </div>
         </div>
@@ -203,6 +232,22 @@
 
     <div id="chars" class="content-section">
         <div class="char-grid" id="charList"></div>
+    </div>
+</div>
+
+<div id="audio-player-container">
+    <div class="player-controls">
+        <button id="play-pause-btn">▶</button>
+        <div class="progress-container">
+            <span class="time-display" id="current-time">00:00</span>
+            <input type="range" id="seek-bar" value="0" step="0.1">
+            <span class="time-display" id="duration">00:00</span>
+        </div>
+        <div class="volume-container">
+            <span style="font-size: 0.7rem; color: var(--red);">VOL</span>
+            <input type="range" id="volume-bar" value="100" step="1" min="0" max="100">
+        </div>
+        <div id="bgm-status-text">BGM: FEED_INACTIVE</div>
     </div>
 </div>
 
@@ -227,13 +272,20 @@
     ];
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const bgm = document.getElementById('bgm');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const seekBar = document.getElementById('seek-bar');
+    const volumeBar = document.getElementById('volume-bar');
+    const currentTimeText = document.getElementById('current-time');
+    const durationText = document.getElementById('duration');
+    const bgmStatus = document.getElementById('bgm-status-text');
 
+    // Tactical Effects
     function playTacticalSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
         const master = audioCtx.createGain();
         master.connect(audioCtx.destination);
-
         if (type === 'click') {
             const osc1 = audioCtx.createOscillator();
             const g1 = audioCtx.createGain();
@@ -252,19 +304,50 @@
         }
     }
 
+    // Custom Audio Control Logic
+    playPauseBtn.onclick = () => {
+        if (bgm.paused) {
+            bgm.play();
+            playPauseBtn.innerText = "||";
+            bgmStatus.innerText = "BGM: STREAMING_ACTIVE";
+        } else {
+            bgm.pause();
+            playPauseBtn.innerText = "▶";
+            bgmStatus.innerText = "BGM: FEED_PAUSED";
+        }
+    };
+
+    bgm.ontimeupdate = () => {
+        const current = bgm.currentTime;
+        const duration = bgm.duration;
+        seekBar.value = (current / duration) * 100;
+        currentTimeText.innerText = formatTime(current);
+        durationText.innerText = formatTime(duration);
+    };
+
+    seekBar.oninput = () => {
+        const seekTo = bgm.duration * (seekBar.value / 100);
+        bgm.currentTime = seekTo;
+    };
+
+    volumeBar.oninput = () => {
+        bgm.volume = volumeBar.value / 100;
+    };
+
+    function formatTime(seconds) {
+        const min = Math.floor(seconds / 60);
+        const sec = Math.floor(seconds % 60);
+        return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    }
+
     window.onload = () => {
         const bg = document.getElementById('matrix-bg');
         bg.innerText = Array.from({length: 4000}, () => Math.floor(Math.random()*2)).join('');
-
         let progress = 0;
         const bar = document.getElementById('bar');
         const status = document.getElementById('boot-status');
         const consoleLog = document.getElementById('log-console');
-
-        const logs = [
-            "SCANNING TOPOGRAPHY...", "IDENTIFYING SECTORS...", "P.DATA_LOAD_01... OK", 
-            "CONNECTING LIVE FEED...", "AMPLIFYING AUDIO SENSORS...", "LINK ESTABLISHED"
-        ];
+        const logs = ["SCANNING TOPOGRAPHY...", "IDENTIFYING SECTORS...", "P.DATA_LOAD_01... OK", "CONNECTING LIVE FEED...", "AMPLIFYING AUDIO SENSORS...", "LINK ESTABLISHED"];
 
         const timer = setInterval(() => {
             progress += Math.random() * 2.5;
@@ -274,7 +357,6 @@
                 finishBoot();
             }
             bar.style.width = progress + "%";
-            
             if (Math.random() > 0.85) {
                 const msg = logs[Math.floor((progress/100) * (logs.length-1))];
                 status.innerText = msg;
@@ -289,10 +371,16 @@
     function finishBoot() {
         const overlay = document.getElementById('loading-overlay');
         const main = document.getElementById('main-ui');
-        const bgm = document.getElementById('bgm');
-
         overlay.style.opacity = '0';
-        bgm.play().catch(e => console.log("BGM pending user interaction."));
+        
+        // Browser Policy Handler
+        const startBGM = () => {
+            bgm.play();
+            playPauseBtn.innerText = "||";
+            bgmStatus.innerText = "BGM: STREAMING_ACTIVE";
+            window.removeEventListener('click', startBGM);
+        };
+        window.addEventListener('click', startBGM);
 
         setTimeout(() => {
             overlay.style.display = 'none';
@@ -328,11 +416,6 @@
     }
 
     render();
-
 </script>
 </body>
-
 </html>
-
-
-
