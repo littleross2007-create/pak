@@ -77,7 +77,7 @@
 
         /* --- MAIN UI --- */
         #main-ui {
-            padding: 20px 20px 100px 20px; /* Player space at bottom */
+            padding: 20px 20px 100px 20px;
             visibility: hidden; opacity: 0;
             transition: opacity 2s;
             max-width: 1400px; margin: 0 auto;
@@ -96,6 +96,7 @@
         }
         .btn.active { background: var(--red); color: white; box-shadow: 0 0 15px var(--red); }
 
+        /* GRID SYSTEM */
         .content-grid { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; 
         }
@@ -119,6 +120,29 @@
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; 
         }
 
+        /* --- CHARACTER MODAL (DOSSIER) --- */
+        #dossier-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            width: 90%; max-width: 900px; background: #0a0a0a;
+            border: 1px solid var(--red); display: flex;
+            position: relative; animation: slideUp 0.4s;
+        }
+
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-img { width: 40%; object-fit: cover; border-right: 1px solid var(--dark-red); }
+        .modal-data { width: 60%; padding: 40px; overflow-y: auto; max-height: 80vh; }
+        .close-modal { position: absolute; top: 20px; right: 20px; color: var(--red); font-size: 2rem; cursor: pointer; }
+
+        .data-label { color: var(--red); font-weight: bold; font-size: 0.8rem; margin-top: 20px; display: block; letter-spacing: 2px; }
+        .data-value { color: #eee; font-size: 1.1rem; line-height: 1.6; }
+
         @keyframes glitch {
             0% { transform: translate(0); }
             50% { transform: translate(-3px, 2px) skewX(2deg); opacity: 0.8; }
@@ -128,66 +152,36 @@
         .content-section { display: none; animation: fadeIn 1s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- NEW AUDIO PLAYER UI --- */
+        /* --- AUDIO PLAYER UI --- */
         #audio-player-container {
-            position: fixed;
-            bottom: 0; left: 0; width: 100%;
-            height: 70px;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 1px solid var(--dark-red);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 30px;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(0, 0, 0, 0.9); border-top: 1px solid var(--dark-red);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            padding: 0 30px; box-sizing: border-box; backdrop-filter: blur(10px);
         }
 
         .player-controls { display: flex; align-items: center; gap: 20px; width: 100%; max-width: 1200px; }
-        
-        #play-pause-btn {
-            background: transparent; border: 1px solid var(--red);
-            color: var(--red); width: 40px; height: 40px; cursor: pointer;
-            font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
-        }
+        #play-pause-btn { background: transparent; border: 1px solid var(--red); color: var(--red); width: 40px; height: 40px; cursor: pointer; font-weight: bold; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; }
         #play-pause-btn:hover { background: var(--red); color: white; }
-
         .progress-container { flex-grow: 1; display: flex; align-items: center; gap: 15px; }
         .time-display { font-size: 0.7rem; color: var(--red); min-width: 45px; }
-        
-        #seek-bar {
-            flex-grow: 1; accent-color: var(--red); cursor: pointer;
-            height: 2px; background: #333;
-        }
-
+        #seek-bar { flex-grow: 1; accent-color: var(--red); cursor: pointer; height: 2px; background: #333; }
         .volume-container { display: flex; align-items: center; gap: 10px; min-width: 150px; }
         #volume-bar { width: 80px; accent-color: var(--red); cursor: pointer; }
-
-        #bgm-status-text {
-            color: var(--red); font-size: 0.7rem; letter-spacing: 2px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; }
-        }
+        #bgm-status-text { color: var(--red); font-size: 0.7rem; letter-spacing: 2px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<audio id="bgm" loop>
-    <source src="./battle.mp3" type="audio/mpeg">
-</audio>
+<audio id="bgm" loop><source src="./battle.mp3" type="audio/mpeg"></audio>
 
 <div id="loading-overlay">
     <div id="matrix-bg"></div>
     <div class="boot-box">
         <div class="main-logo">PROJECT ALL KILL</div>
         <div id="boot-status" style="color: #888; letter-spacing: 3px; font-size: 0.8rem;">SYNCING BATTLE FEED...</div>
-        <div class="loading-bar-container">
-            <div class="loading-bar-fill" id="bar"></div>
-        </div>
+        <div class="loading-bar-container"><div class="loading-bar-fill" id="bar"></div></div>
         <div id="log-console"></div>
     </div>
 </div>
@@ -235,6 +229,32 @@
     </div>
 </div>
 
+<div id="dossier-modal" onclick="closeDossier()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeDossier()">&times;</span>
+        <img id="m-img" src="" class="modal-img">
+        <div class="modal-data">
+            <h1 id="m-code" style="color:var(--red); letter-spacing: 5px; margin:0;">CODE NAME</h1>
+            <div style="display:flex; gap:30px;">
+                <div>
+                    <span class="data-label">REAL NAME</span>
+                    <span id="m-name" class="data-value">-</span>
+                </div>
+                <div>
+                    <span class="data-label">AGE</span>
+                    <span id="m-age" class="data-value">-</span>
+                </div>
+            </div>
+            <span class="data-label">ORIGIN</span>
+            <span id="m-origin" class="data-value">-</span>
+            <span class="data-label">WEAPON</span>
+            <span id="m-weapon" class="data-value">-</span>
+            <span class="data-label">BACKGROUND STORY</span>
+            <p id="m-story" class="data-value" style="font-size: 0.95rem;"></p>
+        </div>
+    </div>
+</div>
+
 <div id="audio-player-container">
     <div class="player-controls">
         <button id="play-pause-btn">▶</button>
@@ -253,154 +273,110 @@
 
 <script>
     const data = [
-        { code: "Ghost", name: "Cha Yun-seol", weapon: "Combat Knife", origin: "South Korea", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/14.png" },
-        { code: "Spade", name: "Pierre Lavigne", weapon: "Booby Traps", origin: "France", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/15.png" },
-        { code: "Queen", name: "Clara Holloway", weapon: "Dual Pistols", origin: "USA", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/16.png" },
-        { code: "Coin", name: "Jol", weapon: "Fountain Pen", origin: "Unknown", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/9.png" },
-        { code: "Whisper", name: "Anna Sokolov", weapon: "Sniper Rifle", origin: "Unknown", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/12.png" },
-        { code: "Brute", name: "Diego Oropesa", weapon: "Brass Knuckles", origin: "Brazil", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/13.png" },
-        { code: "Swift", name: "Irina Volkova", weapon: "Dual Daggers", origin: "Russia", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/11.png" },
-        { code: "Swinger", name: "Lenny Black", weapon: "Metal Baseball Bat", origin: "USA", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/10.png" },
-        { code: "Sakura", name: "Rina Hanazawa", weapon: "Katana", origin: "Japan", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/8.png" },
-        { code: "Silent", name: "Chen Feng", weapon: "Handgun", origin: "China", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/7.png" },
-        { code: "Chain", name: "Lona McTavish", weapon: "Chainsaw", origin: "Scotland", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/6.png" },
-        { code: "Slasher", name: "Bato", weapon: "Machete", origin: "Philippines", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/2.png" },
-        { code: "Hummingbird", name: "Trixie Hamilton", weapon: "Assault Rifle", origin: "UK", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/1.png" },
-        { code: "Hunter", name: "Nyx", weapon: "Longbow", origin: "Norway", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/4.png" },
-        { code: "Crow", name: "Lee Si-woo", weapon: "Crossbow", origin: "South Korea", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/5.png" },
-        { code: "Teuton", name: "Ulrich von Magdeburg", weapon: "Longsword", origin: "Germany", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/3.png" }
+        { code: "Ghost", name: "Cha Yun-seol", age: 24, weapon: "Combat Knife", origin: "South Korea", story: "그녀는 자비없는 킬러이자 복수귀입니다. 자신의 소중한 것을 빼앗은 자를 죽이기 위한 정보를 얻기 위해 참가하였습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/14.png" },
+        { code: "Spade", name: "Pierre Lavigne", age: 28, weapon: "Booby Traps", origin: "France", story: "그는 연출가이자 세상이라는 거대한 희극의 관객입니다. 그의 목적은 오직 '재미' 입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/15.png" },
+        { code: "Queen", name: "Clara Holloway", age: 27, weapon: "Dual Pistols", origin: "USA", story: "그녀는 필라델피아 지하세계의 여왕이자 학살자입니다. 그녀는 피와 총성으로 왕좌를 쌓았고, 이제는 더 이상 권력에도 흥미가 없습니다. 그저 잔혹한 놀이를 즐기기 위해 참가하였습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/16.png" },
+        { code: "Coin", name: "Jol", age: 55, weapon: "Fountain Pen", origin: "Unknown", story: "그는 수수께끼의 남자입니다. 출신도, 진짜 이름도, 심지어 그의 나이마저 확실하지 않습니다. 그가 가진 것은 낡은 동전 하나와 만연필 한 자루뿐입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/9.png" },
+        { code: "Whisper", name: "Anna Sokolov", age: 25, weapon: "Sniper Rifle", origin: "Unknown", story: "그녀는 유명한 킬러이자 명사수입니다. 그녀는 북극에서 왔다는 소문만 떠돌 뿐, 과거는 아무도 모릅니다. 그저 게으르고 돈만 밝히는 킬러라는 이야기만 들릴 뿐입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/12.png" },
+        { code: "Brute", name: "Diego Oropesa", age: 24, weapon: "Brass Knuckles", origin: "Brazil", story: "그는 브라질 리우의 빈만가 출신입니다. 싸움은 그에겐 생존임과 동시에 즐거운 놀이에 불과합니다. 그는 복수도, 정의도, 신념도 없습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/13.png" },
+        { code: "Swift", name: "Irina Volkova", age: 25, weapon: "Dual Daggers", origin: "Russia", story: "그녀는 기계같은 암살자입니다. 그녀는 기쁨도 슬픔도, 그 아무것도 느끼지 못합니다. 오직 한 사람을 처리하기 위해 참여하였습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/11.png" },
+        { code: "Swinger", name: "Lenny Black", age: 22, weapon: "Metal Baseball Bat", origin: "USA", story: "그녀는 시카고 출신의 광기 어린 킬러입니다. 총 대신 금속 야구배트를 휘두르며 폭력을 즐깁니다. 그녀가 이곳에 참가한 이유는 단 하나, 재미있어 보였기 때문입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/10.png" },
+        { code: "Sakura", name: "Rina Hanazawa", age: 24, weapon: "Katana", origin: "Japan", story: "그녀는 일본의 어느 검도 명문가에서 태어났다는 말도 있고, 전혀 상관없는 평범한 가정이었다는 소문도 있습니다. 그녀는 사람을 베는 감각에 재능이 있었습니다. 그녀는 살인을 무겁게 생각하지 않습니다. 암살은 일이고, 이곳은 놀이터 입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/8.png" },
+        { code: "Silent", name: "Chen Feng", age: 27, weapon: "Handgun", origin: "China", story: "그는 중국 출신의 냉철한 암살자입니다. 권총을 사용해 조용하고 정확하게 표적을 제거합니다. 지적인 인물로 비유와 은유를 즐겨 사용하며, 말 한마디로 상황을 지배합니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/7.png" },
+        { code: "Chain", name: "Lona McTavish", age: 23, weapon: "Chainsaw", origin: "Scotland", story: "그녀는 스코틀랜드 외딴 지역의 소심한 성격을 지닌 여자입니다. 평소에는 눈에 띄지 않지만, 전기톱을 손에 쥐는 순간 광기를 드러냅니다. 그녀가 이곳에 참가한 이유는 단 하나, 학살을 위해서입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/6.png" },
+        { code: "Slasher", name: "Bato", age: 25, weapon: "Machete", origin: "Philippines", story: "그는 필리핀 출신의 잔혹한 학살자입니다. 마체테를 들고 조용히 다가가, 저항할 틈도 없이 베어 넘깁니다. 그에게 살인은 수단이 아니라 습관이며, 학살을 위해 참가했습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/2.png" },
+        { code: "Hummingbird", name: "Trixie Hamilton", age: 22, weapon: "Assault Rifle", origin: "UK", story: "그녀는 영국 출신의 문제아 킬러입니다. 돌격소총을 들고 거침없이 총을 난사하며 전장을 휘젓습니다. 규칙과 통제를 싫어하는 악동이며, 재미와 혼란을 즐기기 위해 참가했습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/1.png" },
+        { code: "Hunter", name: "Nyx", age: 25, weapon: "Longbow", origin: "Norway", story: "그녀는 노르웨이 출신의 차분하고 고요한 헌터입니다. 활을 사용해 먼 거리에서 표적을 추적하고 제거합니다. 불필요한 감정은 개입하지 않으며, 정보를 획득하기 위해 참가했습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/4.png" },
+        { code: "Crow", name: "Lee Si-woo", age: 30, weapon: "Crossbow", origin: "South Korea", story: "그는 한 때 대한민국의 특전사였습니다. 모종의 이유로 킬러의 세계의 발을 들였으며, 지금의 그는 목적도 소속도 없이 방황한 채 이곳에 참여하였습니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/5.png" },
+        { code: "Teuton", name: "Ulrich von Magdeburg", age: 29, weapon: "Longsword", origin: "Germany", story: "그는 독일 출신의 원칙주의자이자 광적인 신념의 추종자입니다. 갑옷을 걸치고 롱소드를 들고 다니며, 자신의 신념을 절대적인 정의로 믿습니다. 학살은 죄가 아니라 사명입니다.", img: "https://raw.githubusercontent.com/littleross2007-create/ak/refs/heads/main/3.png" }
     ];
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const bgm = document.getElementById('bgm');
     const playPauseBtn = document.getElementById('play-pause-btn');
-    const seekBar = document.getElementById('seek-bar');
-    const volumeBar = document.getElementById('volume-bar');
-    const currentTimeText = document.getElementById('current-time');
-    const durationText = document.getElementById('duration');
     const bgmStatus = document.getElementById('bgm-status-text');
 
-    // Tactical Effects
     function playTacticalSound(type) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const now = audioCtx.currentTime;
-        const master = audioCtx.createGain();
-        master.connect(audioCtx.destination);
+        const master = audioCtx.createGain(); master.connect(audioCtx.destination);
         if (type === 'click') {
-            const osc1 = audioCtx.createOscillator();
-            const g1 = audioCtx.createGain();
-            osc1.type = 'sine'; osc1.frequency.setValueAtTime(120, now);
-            osc1.frequency.exponentialRampToValueAtTime(40, now + 0.12);
-            g1.gain.setValueAtTime(0.4, now); g1.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-            osc1.connect(g1); g1.connect(master);
-            osc1.start(); osc1.stop(now + 0.12);
+            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(120, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+            g.gain.setValueAtTime(0.4, now); g.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            osc.connect(g); g.connect(master); osc.start(); osc.stop(now + 0.12);
         } else if (type === 'hover') {
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
+            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
             osc.type = 'square'; osc.frequency.setValueAtTime(1500, now);
             g.gain.setValueAtTime(0.01, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-            osc.connect(g); g.connect(master);
-            osc.start(); osc.stop(now + 0.03);
+            osc.connect(g); g.connect(master); osc.start(); osc.stop(now + 0.03);
         }
     }
 
-    // Custom Audio Control Logic
+    // Audio Controls
     playPauseBtn.onclick = () => {
-        if (bgm.paused) {
-            bgm.play();
-            playPauseBtn.innerText = "||";
-            bgmStatus.innerText = "BGM: STREAMING_ACTIVE";
-        } else {
-            bgm.pause();
-            playPauseBtn.innerText = "▶";
-            bgmStatus.innerText = "BGM: FEED_PAUSED";
-        }
+        if (bgm.paused) { bgm.play(); playPauseBtn.innerText = "||"; bgmStatus.innerText = "BGM: STREAMING_ACTIVE"; }
+        else { bgm.pause(); playPauseBtn.innerText = "▶"; bgmStatus.innerText = "BGM: FEED_PAUSED"; }
     };
-
     bgm.ontimeupdate = () => {
-        const current = bgm.currentTime;
-        const duration = bgm.duration;
-        seekBar.value = (current / duration) * 100;
-        currentTimeText.innerText = formatTime(current);
-        durationText.innerText = formatTime(duration);
+        document.getElementById('current-time').innerText = formatTime(bgm.currentTime);
+        document.getElementById('duration').innerText = formatTime(bgm.duration);
+        document.getElementById('seek-bar').value = (bgm.currentTime / bgm.duration) * 100;
     };
+    document.getElementById('seek-bar').oninput = () => bgm.currentTime = bgm.duration * (document.getElementById('seek-bar').value / 100);
+    document.getElementById('volume-bar').oninput = () => bgm.volume = document.getElementById('volume-bar').value / 100;
+    function formatTime(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
 
-    seekBar.oninput = () => {
-        const seekTo = bgm.duration * (seekBar.value / 100);
-        bgm.currentTime = seekTo;
-    };
+    // Dossier Function
+    function openDossier(code) {
+        playTacticalSound('click');
+        const p = data.find(x => x.code === code);
+        document.getElementById('m-img').src = p.img;
+        document.getElementById('m-code').innerText = p.code;
+        document.getElementById('m-name').innerText = p.name;
+        document.getElementById('m-age').innerText = p.age;
+        document.getElementById('m-origin').innerText = p.origin;
+        document.getElementById('m-weapon').innerText = p.weapon;
+        document.getElementById('m-story').innerText = p.story;
+        document.getElementById('dossier-modal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
-    volumeBar.oninput = () => {
-        bgm.volume = volumeBar.value / 100;
-    };
-
-    function formatTime(seconds) {
-        const min = Math.floor(seconds / 60);
-        const sec = Math.floor(seconds % 60);
-        return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    function closeDossier() {
+        document.getElementById('dossier-modal').style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
 
     window.onload = () => {
         const bg = document.getElementById('matrix-bg');
         bg.innerText = Array.from({length: 4000}, () => Math.floor(Math.random()*2)).join('');
         let progress = 0;
-        const bar = document.getElementById('bar');
-        const status = document.getElementById('boot-status');
-        const consoleLog = document.getElementById('log-console');
-        const logs = ["SCANNING TOPOGRAPHY...", "IDENTIFYING SECTORS...", "P.DATA_LOAD_01... OK", "CONNECTING LIVE FEED...", "AMPLIFYING AUDIO SENSORS...", "LINK ESTABLISHED"];
-
         const timer = setInterval(() => {
-            progress += Math.random() * 2.5;
-            if (progress >= 100) {
-                progress = 100;
-                clearInterval(timer);
-                finishBoot();
-            }
-            bar.style.width = progress + "%";
-            if (Math.random() > 0.85) {
-                const msg = logs[Math.floor((progress/100) * (logs.length-1))];
-                status.innerText = msg;
-                const line = document.createElement('div');
-                line.innerText = "> " + msg;
-                consoleLog.prepend(line);
-                playTacticalSound('hover');
-            }
+            progress += Math.random() * 3;
+            if (progress >= 100) { progress = 100; clearInterval(timer); finishBoot(); }
+            document.getElementById('bar').style.width = progress + "%";
         }, 100);
     };
 
     function finishBoot() {
-        const overlay = document.getElementById('loading-overlay');
-        const main = document.getElementById('main-ui');
-        overlay.style.opacity = '0';
-        
-        // Browser Policy Handler
-        const startBGM = () => {
-            bgm.play();
-            playPauseBtn.innerText = "||";
-            bgmStatus.innerText = "BGM: STREAMING_ACTIVE";
-            window.removeEventListener('click', startBGM);
-        };
-        window.addEventListener('click', startBGM);
-
+        document.getElementById('loading-overlay').style.opacity = '0';
+        window.addEventListener('click', () => { if(bgm.paused) { bgm.play(); playPauseBtn.innerText = "||"; bgmStatus.innerText = "BGM: STREAMING_ACTIVE"; } }, {once: true});
         setTimeout(() => {
-            overlay.style.display = 'none';
-            main.style.visibility = 'visible';
-            main.style.opacity = '1';
-            document.body.style.overflow = 'auto';
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('main-ui').style.visibility = 'visible';
+            document.getElementById('main-ui').style.opacity = '1';
         }, 1500);
     }
 
     function render() {
-        const grid = document.getElementById('charList');
-        grid.innerHTML = data.map(c => `
-            <div class="item-card" style="cursor: crosshair;" onmouseenter="playTacticalSound('hover')" onclick="playTacticalSound('click')">
+        document.getElementById('charList').innerHTML = data.map(c => `
+            <div class="item-card" onclick="openDossier('${c.code}')" onmouseenter="playTacticalSound('hover')">
                 <img src="${c.img}" alt="${c.code}" style="height: 400px;" onerror="this.src='https://via.placeholder.com/300x400/000/ff0000?text=SIGNAL+LOST'">
                 <div class="item-info">
                     <div class="item-title">${c.code}</div>
                     <div class="item-desc" style="font-size: 0.75rem; text-transform: uppercase;">
                         <b style="color:#bbb">NAME:</b> ${c.name}<br>
-                        <b style="color:#bbb">WEAPON:</b> ${c.weapon}<br>
-                        <b style="color:#bbb">ORIGIN:</b> ${c.origin}
+                        <b style="color:#bbb">WEAPON:</b> ${c.weapon}
                     </div>
                 </div>
             </div>
